@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "syncbridge",
+  "version": "${version}",
+  "name": "VM-ServerSyncBridge",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/vm-serversyncbridge/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.tp4.syncbridge.VMServerSyncBridge"
+    ]
+  },
+  "mixins": [
+    "vm-serversyncbridge.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

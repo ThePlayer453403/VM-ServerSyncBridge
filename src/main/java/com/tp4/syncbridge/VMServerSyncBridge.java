@@ -30,14 +30,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-//TODO: 在“未知物品”的custom_data中移除对count的记录，以保证同ID物品可以正常堆叠
-//TODO: 添加可以自定义的json保存地点
-//TODO: 为特殊玩家禁用同步
-//TODO: 同步更多信息（如：成就）
-//TODO: 附魔兼容（666只要有附魔就消失）
-
-//TODO: 拦截未知数据包
-
 public class VMServerSyncBridge implements ModInitializer {
     public static List<String> MOD_LIST;
     final Base64.Encoder encoder = Base64.getEncoder();

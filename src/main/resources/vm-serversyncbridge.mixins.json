@@ -4,6 +4,7 @@
   "package": "com.tp4.syncbridge.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "PacketMixin"
   ],
   "client": [
   ],

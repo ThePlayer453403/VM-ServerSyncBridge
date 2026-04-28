@@ -10,33 +10,47 @@ import net.minecraft.registry.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minidev.json.JSONObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.nio.file.Paths;
+
 
 public class VMServerSyncBridge implements ModInitializer {
     public static RegistryOps<JsonElement> ops;
+    public static JSONObject config;
+    public static final Logger logger = LogManager.getLogger();
 
     @Override
     public void onInitialize() {
+        config = Config.loadConfig();
+
         ServerPlayConnectionEvents.JOIN.register(this::loadInventory);
         ServerPlayConnectionEvents.DISCONNECT.register(this::saveInventory);
         ServerLifecycleEvents.SERVER_STARTED.register((server) -> ops = RegistryOps.of(JsonOps.INSTANCE, server.getRegistryManager()));
     }
 
     public void loadInventory(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) {
-        JSONObject object = FileOperation.readJson(String.format("E:/%s.json", handler.player.getUuid()));
+        JSONObject inventory = FileOperation.readJson(String.valueOf(Paths.get(config.getAsString("sync_dir"), "inventory")), String.format("%s.json", handler.player.getUuid()));
         for (int i=0; i<41; i++) {
-            handler.player.getInventory().setStack(i, ItemStackEncoding.decodeItemStack(object.getAsString(String.valueOf(i)), ops));
+            handler.player.getInventory().setStack(i, ItemStackEncoding.decodeItemStack(inventory.getAsString(String.valueOf(i)), ops));
+        }
+        JSONObject enderchest = FileOperation.readJson(String.valueOf(Paths.get(config.getAsString("sync_dir"), "enderchest")), String.format("%s.json", handler.player.getUuid()));
+        for (int i=0; i<27; i++) {
+            handler.player.getEnderChestInventory().setStack(i, ItemStackEncoding.decodeItemStack(enderchest.getAsString(String.valueOf(i)), ops));
         }
     }
 
     public void saveInventory(ServerPlayNetworkHandler handler, MinecraftServer server) {
-        JSONObject object = new JSONObject();
+        JSONObject inventory = new JSONObject();
         for (int i=0; i<41; i++) {
-            System.out.println(handler.player.getInventory().getStack(i));
-            object.put(String.valueOf(i), ItemStackEncoding.encodeItemStack(handler.player.getInventory().getStack(i), ops));
+            inventory.put(String.valueOf(i), ItemStackEncoding.encodeItemStack(handler.player.getInventory().getStack(i), ops));
         }
-        System.out.println("saved!");
-        FileOperation.saveJson(String.format("E:/%s.json", handler.player.getUuid()), object);
+        FileOperation.saveJson(String.valueOf(Paths.get(config.getAsString("sync_dir"), "inventory")), String.format("%s.json", handler.player.getUuid()), inventory);
+        JSONObject enderchest = new JSONObject();
+        for (int i=0; i<27; i++) {
+            enderchest.put(String.valueOf(i), ItemStackEncoding.encodeItemStack(handler.player.getEnderChestInventory().getStack(i), ops));
+        }
+        FileOperation.saveJson(String.valueOf(Paths.get(config.getAsString("sync_dir"), "enderchest")), String.format("%s.json", handler.player.getUuid()), enderchest);
     }
 }
